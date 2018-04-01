@@ -1,0 +1,77 @@
+version: '2'
+services:
+    admin:
+        image: registry.performax.cz:5001/antiadblock/admin:__VERSION__
+        restart: always
+        environment:
+            - TZ=Europe/Prague
+        links:
+            - api
+        volumes_from:
+            - api
+        volumes:
+          - /var/log/antiadblock/coredata/nginx:/var/log/nginx
+          - /etc/letsencrypt:/etc/letsencrypt
+          - /var/lib/letsencrypt:/var/lib/letsencrypt
+          - /var/acme-webroot:/var/acme-webroot
+
+        ports:
+            - 80:80
+            - 443:443
+            - 8000:8000
+        depends_on:
+            - api
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "400k"
+                max-file: "3"
+    api:
+        image: registry.performax.cz:5001/antiadblock/api:v0.0.16
+        restart: always
+        volumes:
+            - uwsgi-socket:/app/run
+        stop_signal: SIGQUIT
+        environment:
+            - TZ=Europe/Prague
+            - UWSGI_HTTP_SOCKET=:8888
+            # pridat parametr kde ma API hledat elasticsearch
+            - CONF_ELASTICSEARCH=[{"host":"elasticsearch.tiscali.local", "port":9200}]
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "400k"
+                max-file: "3"
+
+     # pri prvni instalaci na prvni stroj vytvor certifikaty pomoci:
+     # docker-compose run --rm lets_encrypt_cli add {domena}
+    lets_encrypt_cli:
+        image: registry.performax.cz:5001/docker/letsencrypt-manager:master
+        volumes:
+          - /etc/letsencrypt:/etc/letsencrypt
+          - /var/lib/letsencrypt:/var/lib/letsencrypt
+          - /var/acme-webroot:/var/acme-webroot
+
+    letencrypt_cron:
+        image: registry.performax.cz:5001/docker/letsencrypt-manager:master
+        volumes:
+          - /etc/letsencrypt:/etc/letsencrypt
+          - /var/lib/letsencrypt:/var/lib/letsencrypt
+          - /var/acme-webroot:/var/acme-webroot
+        command: cron-auto-renewal
+        restart: always
+
+    git-sync:
+        image: registry.performax.cz:5001/docker/git-sync:master
+        environment:
+          GIT_REPO_URL: "ssh://git@gitlab.performax.cz:10022/antiadblock/letsencrypt-certs/admin.git"
+          GIT_REPO_BRANCH: "master"
+          GIT_USER_EMAIL: "letsencrypt@performax.cz"
+          GIT_USER_NAME: "letsencrypt-sync"
+        volumes:
+          - /etc/letsencrypt:/sync-dir
+        restart: always
+
+
+volumes:
+    uwsgi-socket: {}

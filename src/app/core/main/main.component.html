@@ -1,0 +1,61 @@
+<div>
+
+	<div class="ui fixed inverted stackable menu">
+		<!--<div class="ui container">-->
+
+			<a href="#">
+        		<img src="assets/alf-logo-small.png" height="50">
+      		</a>
+			<div class="right menu">
+				<div class="ui pointing dropdown link item" suiDropdown>
+					<i class="world icon" id="world_icon"></i>
+					<div class="text uppercase" id='languageSelection'>{{localeId}}</div>
+					<div class="menu" suiDropdownMenu>
+						<a class="item" *ngFor="let lang of languages" href="/{{lang.code}}/">
+							{{lang.label}}
+						</a>
+					</div>
+				</div>
+				<div class="ui pointing dropdown link item" suiDropdown>
+					{{ user?.email }} <i class="dropdown icon"></i>
+					<div class="menu"suiDropdownMenu>
+						<!--<a class="item" i18n="main dropdown|Basic information">Info</a>-->
+						<!--<a class="item" i18n="main dropdown|User settings and options">Settings</a>-->
+						<!--<a class="item" i18n="main dropdown|Any additional menu item">Whatever</a>-->
+						<a class="item" (click)="logout()" i18n="main dropdown|sign out button">
+							Logout
+						</a>
+					</div>
+				</div>
+			</div>
+
+		<!--</div>-->
+	</div>
+
+	<div class="ui hidden divider" id="menu_divider"></div>
+
+	<div class="one column stackable padded ui grid">
+		<div class="two wide column">
+			<div class="ui fluid vertical menu">
+				<a class="item" [routerLink]="['/']" routerLinkActive="active" queryParamsHandling="merge" i18n="main menu|Public">
+					Public
+				</a>
+				<a class="item" [routerLink]="['/protected']" routerLinkActive="active" queryParamsHandling="merge" i18n="main menu|Protected">
+					Protected
+				</a>
+				<a class="item" [routerLink]="['/protected/more']" routerLinkActive="active" queryParamsHandling="merge" i18n="main menu|More protected">
+					More protected
+				</a>
+			</div>
+		</div>
+		<div class="fourteen wide column">
+			<router-outlet></router-outlet>
+			<router-outlet name="state"></router-outlet>
+		</div>
+	</div>
+
+</div>
+<div class="ui hidden divider"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.0/semantic.min.js"></script>
+<script src="https://rawgit.com/web-animations/web-animations-js/master/web-animations.min.js"></script>

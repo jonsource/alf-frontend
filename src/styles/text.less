@@ -1,0 +1,47 @@
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+app-admin .grid .column {
+	*:not(i) {
+		color: @baseTextColor;
+		font-family: @baseFont;
+	}
+	*:not(i)::-moz-selection {
+		color: @baseTextColor;
+		background: fade(@baseColor,15%);
+	}
+	*:not(i)::selection {
+		color: @baseTextColor;
+		background: fade(@baseColor,15%);
+	}
+	.header {
+		color: @baseColor;
+	}
+	.header::-moz-selection {
+		color: @baseColor;
+	}
+	.header::selection {
+		color: @baseColor;
+	}
+
+	h1.header {
+		font-size: 2.2rem;
+		font-weight: 400;
+	}
+	h2.header {
+		font-size: 1.8rem;
+		font-weight: 300;
+	}
+	ol li {
+		line-height: 2rem;
+	}
+	p {
+		line-height: 1.5rem;
+	}
+}
+.uppercase{
+	text-transform: uppercase;
+
+}

@@ -1,0 +1,41 @@
+@import "variables";
+@import "base";
+@import "text";
+
+app-admin .grid .column{
+	.button{
+		background: @baseColor;
+		color: #fff;
+		font-weight: 800;
+		line-height: 2.6rem;
+		border-radius: 4px;
+		padding: 0 20px;
+		&.disabled {
+			background: #ccc;
+		}
+	}
+	.button:hover {
+		background: rgb(1, 203, 152);;
+		.span{
+			color:#fff;
+		}
+	}
+	.button span{
+		color: #fff;
+	}
+
+	code {
+		background: #eee;
+		border: 1px solid white;
+		border-radius: 0.25rem;
+		font-family: monospace;
+		font-size: 0.85rem;
+		display: inline-block;
+		line-height: 1.9rem;
+		padding: 0 1.35rem;
+	}
+	.divided.list .content{
+		padding: 1.6rem 0;
+	}
+}
+

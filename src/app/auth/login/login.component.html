@@ -1,0 +1,33 @@
+<div style="width:400px; margin: 0 auto;">
+	<div class="ui hidden divider"></div>
+	<div class="ui fluid image">
+		<img src="assets/alf-logo-full.png"/>
+	</div>
+	<div *ngIf="messages?.length > 0">
+		<app-message *ngFor="let message of messages" [message]="message"></app-message>
+	</div>
+	<form (submit)="login(email.value, password.value)">
+		<div class="ui fluid icon input">
+			<i class="user icon"></i>
+			<input type="text" placeholder="email" name="email" id="email" #email i18n-placeholder>
+		</div>
+		<div class="ui hidden divider"></div>
+		<div class="ui fluid icon input">
+			<i class="lock icon"></i>
+			<input type="password" placeholder="password" name="password" id="password" #password i18n-placeholder>
+		</div>
+		<div class="ui hidden divider"></div>
+		<div class="ui hidden divider"></div>
+		<button class="fluid ui button" type="submit" id="login_button">
+			<ng-container i18n>Login</ng-container>
+		</button>
+	</form>
+	<br>
+	<app-forgotten-password [defaultEmail]="email.value"></app-forgotten-password>
+</div>
+<div class="ui hidden divider"></div>
+<footer>
+    <p class="copyright" id="copyright">© Alf 2018 v{{version}}</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.0/semantic.min.js"></script>

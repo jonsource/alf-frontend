@@ -1,0 +1,8 @@
+<div *ngIf="message" [ngClass]="getMessageState()">
+	  	<i class="close icon" (click)="message=null"></i>
+	  	<div class="header">
+			{{message?.header}}
+	  	</div>
+		<p>{{message?.description}}</p>
+</div>
+<div class="ui hidden divider"></div>

@@ -1,0 +1,97 @@
+stages:
+    - ng
+    - docker
+    - release
+    - deploy
+
+.ng_template: &ng
+    stage: ng
+    image: $CI_REGISTRY/docker/docker-ng-yarn-chromium:master
+    cache:
+        key: node_modules
+        paths:
+            - node_modules/
+
+ng_build:
+    <<: *ng
+    artifacts:
+        paths:
+            - dist/
+    script:
+        - yarn install --no-progress
+        - ng build --target=production --environment=prod --no-progress
+
+ng_lint:
+    <<: *ng
+    script:
+        - yarn install --no-progress
+        - ng lint
+
+ng_test:
+    <<: *ng
+    script:
+        - yarn install --no-progress
+        - ng test --single-run --progress=false --browsers=ChromeHeadless --reporters=spec
+
+docker_build:
+    stage: docker
+    image: docker
+    script:
+        - docker build -t $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME .
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+
+docker_release:
+    stage: release
+    image: docker
+    only:
+        - master
+    script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker tag $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME $CI_REGISTRY_IMAGE:latest
+        - docker push $CI_REGISTRY_IMAGE:latest
+
+dev_deploy:
+    stage: deploy
+    image: $CI_REGISTRY/docker/docker-python-test:master
+    only:
+        - development
+    environment:
+        name: $CI_JOB_NAME
+        url: https://$CI_JOB_NAME.antiadblock.com
+    script:
+        - ssh -f -L 22:localhost:22 -p 2222 -N root@77.78.81.137
+        - scp docker-compose.prod.yml localhost:antiadblock-admin/docker-compose.yml
+        - "ssh localhost \"sed -i 's/__VERSION__/$CI_BUILD_REF_NAME/g;' antiadblock-admin/docker-compose.yml\""
+        - ssh localhost "cd antiadblock-admin; docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY && echo 'LOGIN to $CI_REGISTRY succeeded'"
+        - ssh localhost "cd antiadblock-admin; docker-compose pull && docker-compose up -d"
+        # zrusit ssh tunel
+        - killall ssh
+
+.deploy_template: &deploy
+    stage: deploy
+    image: $CI_REGISTRY/docker/docker-python-test:master
+    only:
+        - /^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$/
+    except:
+        - branches
+    when: manual
+    allow_failure: false
+    environment:
+        name: $CI_JOB_NAME
+        url: https://$CI_JOB_NAME.antiadblock.com
+    script:
+        - ssh -f -N -L 22:$CI_JOB_NAME:22 tiscali@lvs1.tiscalimail.cz
+        - scp docker-compose.prod.yml localhost:antiadblock-admin/docker-compose.yml
+        - "ssh localhost \"sed -i 's/__VERSION__/$CI_BUILD_REF_NAME/g;' antiadblock-admin/docker-compose.yml\""
+        - ssh localhost "cd antiadblock-admin; docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY && echo 'LOGIN to $CI_REGISTRY succeeded'"
+        - ssh localhost "cd antiadblock-admin; docker-compose pull && docker-compose up -d"
+        # zrusit ssh tunel
+        - killall ssh
+
+# nethost
+antiadblock-admin1:
+    <<: *deploy
+
+antiadblock-admin2:
+    <<: *deploy

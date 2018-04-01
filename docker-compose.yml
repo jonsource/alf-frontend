@@ -1,0 +1,48 @@
+version: '2'
+services:
+    admin:
+        image: registry.performax.cz:5001/antiadblock/admin
+        build: .
+        restart: always
+        environment:
+            - TZ=Europe/Prague
+        links:
+            - api
+        volumes_from:
+            - api
+        ports:
+            - 80:80
+            #- 443:443
+        depends_on:
+            - api
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "400k"
+                max-file: "3"
+    api:
+        image: registry.performax.cz:5001/antiadblock/api
+        build: ../api
+        restart: always
+        volumes:
+            - uwsgi-socket:/app/run
+        stop_signal: SIGQUIT
+        environment:
+            - TZ=Europe/Prague
+            - UWSGI_HTTP_SOCKET=:8888
+            # pridat parametr kde ma API hledat elasticsearch
+            - CONF_ELASTICSEARCH=[{"host":"es", "port":9200}]
+        links:
+            - es
+        depends_on:
+            - es
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "400k"
+                max-file: "3"
+    es:
+        image: elasticsearch
+
+volumes:
+    uwsgi-socket: {}

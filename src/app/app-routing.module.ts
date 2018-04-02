@@ -3,8 +3,7 @@ import {Routes, RouterModule, PreloadAllModules} from '@angular/router';
 import {MainComponent} from './core/main/main.component';
 import {LoggedInGuard} from './auth/guard/logged-in.guard';
 import {AllowedGuard} from 'app/auth/guard/allowed.guard';
-import {LoginComponent} from './auth/login/login.component';
-import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
+import {authRoutes} from 'app/auth/auth.module';
 import {PageWithMessageComponent} from 'app/core/page-with-message/page-with-message.component';
 
 const routes: Routes = [
@@ -17,9 +16,15 @@ const routes: Routes = [
 				data: [{message: 'More protected page.'}]},
 		]
 	},
-	{path: 'login', component: LoginComponent},
+	{
+		path: 'admin', children: [
+			{'path': '', redirectTo: 'login', pathMatch: 'full'},
+			...authRoutes,
+		]
+	},
+	/*{path: 'login', component: LoginComponent},
 	{path: 'reset-password/:reset_key', component: ResetPasswordComponent},
-	{path: 'change-password/:reset_key', component: ResetPasswordComponent},
+	{path: 'change-password/:reset_key', component: ResetPasswordComponent},*/
 
 	{path: '**', redirectTo: 'not-found'}
 ];

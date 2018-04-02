@@ -1,24 +1,34 @@
-import {Injectable} from '@angular/core';
-import {Http, Response} from '@angular/http';
+import {Injectable, InjectionToken, Inject, Optional} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import 'rxjs/add/operator/map';
 import {Observable} from 'rxjs/Observable';
 import {LoggedInUser} from '../resources/user.resource';
-import {environment} from '../../environments/environment';
+
+export const AUTH_CONFIG = new InjectionToken<AuthServiceConfig>('auth.config');
 
 @Injectable()
 export class AuthService {
+	public config: AuthServiceConfig;
 
-	constructor(private http: Http) {
+	constructor(private http: HttpClient,
+				@Optional() @Inject(AUTH_CONFIG) config: AuthServiceConfig,
+	) {
+		if (!config) {
+			config = {message: 'zlo', loginAPI: '/login', loginUrl: '/login'};
+		}
+		this.config = config;
 	}
 
-	login(email: string, password: string): Observable<Response> {
-		return this.http.post(
-			environment.apiEndpoint + '/login',
+	login(email: string, password: string): Observable<LoggedInUser> {
+		console.log(this.config);
+		return this.http.post<LoggedInUser>(
+			// environment.apiEndpoint + '/login',
+			this.config.loginAPI,
 			{email: email, password: password}
 		)
 			.map(response => {
 				console.log('logged in');
-				localStorage.setItem('loggedinuser', response.text());
+				localStorage.setItem('loggedinuser', JSON.stringify(response));
 				return response;
 			});
 	}
@@ -30,6 +40,7 @@ export class AuthService {
 	}
 
 	isLoggedIn(): boolean {
+		console.log(this.config.message);
 		return localStorage.getItem('loggedinuser') !== null;
 	}
 
@@ -45,5 +56,10 @@ export class AuthService {
 		return false;
 	}
 
+}
 
+export interface AuthServiceConfig {
+	message: string;
+	loginUrl: string;
+	loginAPI: string;
 }
